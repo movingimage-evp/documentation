@@ -1,0 +1,102 @@
+name: deploy {{service-name}}
+on:
+  workflow_dispatch:
+    inputs:
+      env:
+        description: 'environment (DEV, QA, PROD)'
+        required: true
+        default: 'DEV'
+      version:
+        description: 'version'
+        required: true
+env:
+  APPLICATION_NAME: {{service-name}}
+  OVPN_USERNAME: github.vpn
+  CHART_PATH: helm/{{service-name}}
+  NAMESPACE: {{namespace}}
+  SLACK_WEBHOOK_SECRET_DEPLOYMENTS_NON_PROD: {{slack-webhook-secret-name-deployments-non-prod}}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    concurrency: deploy-${{ github.event.inputs.env }}
+    env:
+      DEPLOYMENT_ENV: ${{ github.event.inputs.env }}
+      CHART_VERSION: ${{ github.event.inputs.version }}
+    steps:
+      - name: Set deploy configurations for PROD
+        if: env.DEPLOYMENT_ENV == 'PROD'
+        run: |
+          echo "KUBECONFIG_ENV=KUBECONFIG_PROD" >> $GITHUB_ENV
+          echo "CHART_VALUE_FILE=values/prod.yaml" >> $GITHUB_ENV
+          echo "SLACK_WEBHOOK=${{ secrets.SLACK_WEBHOOK_DEPLOYMENTS_PRODUCTION }}" >> $GITHUB_ENV
+      #   echo "NEW_RELIC_APP_ID=tbd" >> $GITHUB_ENV
+      - name: Set deploy configurations for DEV
+        if: env.DEPLOYMENT_ENV == 'DEV'
+        run: |
+          echo "KUBECONFIG_ENV=KUBECONFIG_DEV" >> $GITHUB_ENV
+          echo "CHART_VALUE_FILE=values/dev.yaml" >> $GITHUB_ENV
+          echo "SLACK_WEBHOOK=${{ env.SLACK_WEBHOOK_SECRET_DEPLOYMENTS_NON_PROD != '' && secrets[env.SLACK_WEBHOOK_SECRET_DEPLOYMENTS_NON_PROD] || '' }}" >> $GITHUB_ENV
+      #   echo "NEW_RELIC_APP_ID=tbd" >> $GITHUB_ENV
+      - name: Set deploy configurations for QA
+        if: env.DEPLOYMENT_ENV == 'QA'
+        run: |
+          echo "KUBECONFIG_ENV=KUBECONFIG_QA" >> $GITHUB_ENV
+          echo "CHART_VALUE_FILE=values/qa.yaml" >> $GITHUB_ENV
+          echo "SLACK_WEBHOOK=${{ env.SLACK_WEBHOOK_SECRET_DEPLOYMENTS_NON_PROD != '' && secrets[env.SLACK_WEBHOOK_SECRET_DEPLOYMENTS_NON_PROD] || '' }}" >> $GITHUB_ENV
+      #   echo "NEW_RELIC_APP_ID=tbd" >> $GITHUB_ENV
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install OpenVPN
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get -qq install -y openvpn
+
+      - name: Connect to VPN
+        uses: kota65535/github-openvpn-connect-action@v1.0.2
+        with:
+          config_file: .github/config.ovpn
+          username: ${{ env.OVPN_USERNAME }}
+          password: ${{ secrets.OVPN_PASSWORD }}
+          client_key: ${{ secrets.OVPN_CLIENT_KEY }}
+
+      - name: Install helm
+        uses: azure/setup-helm@v1
+        with:
+          version: v3.6.3
+
+      - name: Set k8s context
+        uses: azure/k8s-set-context@v1
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets [ env.KUBECONFIG_ENV ] }}
+
+      - name: Deploy version ${{env.CHART_VERSION}} to ${{env.DEPLOYMENT_ENV}}
+        working-directory: ${{ env.CHART_PATH }}
+        run: |
+          helm package --version=${CHART_VERSION} .
+          helm upgrade --install --debug --create-namespace --namespace ${NAMESPACE} \
+                            -f ${CHART_VALUE_FILE} \
+                            --set newrelic.key="${{ secrets.{{newrelic-license-key-secret-name}} }}" \
+                            ${APPLICATION_NAME} ./${APPLICATION_NAME}-${CHART_VERSION}.tgz
+
+      - name: Create New Relic deployment marker
+        if: env.NEW_RELIC_APP_ID
+        uses: newrelic/deployment-marker-action@v1
+        with:
+          apiKey: ${{ secrets.NEW_RELIC_API_KEY_TEAM_HAI5 }}
+          accountId: ${{ secrets.NEW_RELIC_ACCOUNT_ID }}
+          applicationId: ${{ env.NEW_RELIC_APP_ID }}
+          region: ${{ secrets.NEW_RELIC_REGION }}
+          user: "${{ github.actor }}"
+          revision: "${{ env.CHART_VERSION }}"
+
+      - uses: 8398a7/action-slack@v3
+        if "${{ env.SLACK_WEBHOOK != '' }}"
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,ref,workflow,job,took
+        env:
+          SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK }}

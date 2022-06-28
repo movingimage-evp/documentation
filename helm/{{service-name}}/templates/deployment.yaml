@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ .Release.Name }}
+    version: {{ .Chart.Version }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    team: {{ .Values.global.team }}
+    env: {{ .Values.env }}
+    component: {{ .Values.global.component }}
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+      release: {{ .Release.Name }}
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+        version: {{ .Chart.Version }}
+        chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        release: {{ .Release.Name }}
+        team: {{ .Values.global.team }}
+        env: {{ .Values.env }}
+      name: {{ .Release.Name }}
+    spec:
+      containers:
+      - env:
+        {{ if .Values.newrelic.enabled }}
+        {{- include "environment.newrelic" . | indent 8  }}
+        {{ end }}
+        - name: SPRING_PROFILES_ACTIVE
+          value: {{ .Values.env }}
+        image: "midocker.azurecr.io/{{service-name}}:{{ .Chart.Version }}"
+        imagePullPolicy: Always
+        name: {{ .Release.Name }}
+        resources:
+          requests:
+            cpu: {{ .Values.resources.requests.cpu }}
+            memory: {{ .Values.resources.requests.memory }}
+          limits:
+            cpu: {{ .Values.resources.limits.cpu }}
+            memory: {{ .Values.resources.limits.memory }}
+        terminationMessagePath: /dev/termination-log
+        readinessProbe:
+          initialDelaySeconds: 60
+          periodSeconds: 5
+          timeoutSeconds: 3
+          httpGet:
+            path: /actuator/health
+            port: {{ .Values.ports.targetPort }}
+        ports:
+          - name: http
+            containerPort: {{ .Values.ports.targetPort }}
+          - name: jmx
+            containerPort: 9090
+      imagePullSecrets:
+      - name: midocker.azurecr.io
+      restartPolicy: Always
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      {{ if .Values.scheduling.useCustomTolerations }}
+      {{- include "tolerations" . | indent 6  }}
+      {{ end }}
+      {{ if .Values.scheduling.useCustomAffinity }}
+      {{- include "affinity" . | indent 6  }}
+      {{ end }}

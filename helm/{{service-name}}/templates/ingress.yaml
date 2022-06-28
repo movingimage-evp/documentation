@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod-kong
+    kubernetes.io/ingress.class: public-kong
+  name: {{ .Release.Name }}
+  labels:
+    app: {{ .Release.Name }}
+    team: {{ .Values.global.team }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  rules:
+    - host: {{service-name}}.mi24-az-westeurope-{{ .Values.env }}1.movingimage.com
+      http:
+        paths:
+          - pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ .Release.Name }}
+                port:
+                  number: {{ .Values.ports.port }}
+  tls:
+    - hosts:
+        - {{service-name}}.mi24-az-westeurope-{{ .Values.env }}1.movingimage.com
+      secretName: {{service-name}}

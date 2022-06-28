@@ -1,0 +1,4 @@
+general:
+  vulnerabilities:
+    - CVE-2021-37136
+    - CVE-2021-37137

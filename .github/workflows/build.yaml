@@ -1,0 +1,84 @@
+name: build {{service-name}}
+on:
+  push:
+    branches:
+      - feature/*
+      - hotfix/*
+
+    paths-ignore:
+      - '.gitignore'
+      - 'README.md'
+
+env:
+  APPLICATION_NAME: {{service-name}}
+  ACR_SERVER: midocker.azurecr.io
+  ACR_USERNAME: midocker
+  CHART_PATH: helm/{{service-name}}
+
+jobs:
+  build-docker-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: main
+      - name: Get pom version from main
+        run: echo "MAIN_POM_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
+
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Get pom version from feature branch
+        run: echo "FEATURE_POM_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
+      - name: Check feature version is not behind
+        shell: bash
+        run: |
+          LOWER_VERSION=$(printf '%s\n%s' "${MAIN_POM_VERSION}" "${FEATURE_POM_VERSION}" | sort -V | head -n 1)
+          if [ "${FEATURE_POM_VERSION}" == "${LOWER_VERSION}" ]; then
+            echo "Pom version in feature branch is behind. Bump version."
+            exit 1
+          fi
+
+      - name: Set ARTIFACT_VERSION
+        run: echo "ARTIFACT_VERSION=${FEATURE_POM_VERSION}-${GITHUB_SHA::7}" >> ${GITHUB_ENV}
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+          cache: 'maven'
+      - name: Build jar
+        run: mvn -B -ntp install
+      - name: Surefire Report
+        uses: ScaCap/action-surefire-report@v1.0.5
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: azure/docker-login@v1
+        with:
+          login-server: ${{ env.ACR_SERVER }}
+          username: ${{ env.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Setup image tag
+        run: echo "IMAGE_TAG=${ACR_SERVER}/${APPLICATION_NAME}:${ARTIFACT_VERSION}" >> $GITHUB_ENV
+      - name: Build docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: '.'
+          load: true
+          file: Dockerfile
+          tags: ${{ env.IMAGE_TAG }}
+          no-cache: true
+      - name: Push docker image
+        run: docker push ${IMAGE_TAG}
+
+      - name: Install helm
+        uses: azure/setup-helm@v1
+        with:
+          version: v3.6.3
+      - name: Helm Lint
+        working-directory: ${{ env.CHART_PATH }}
+        run: |
+          for env in values/*.y*ml; do helm lint --values $env; done

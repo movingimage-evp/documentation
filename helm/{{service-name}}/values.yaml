@@ -1,0 +1,22 @@
+newrelic:
+  enabled: {{newrelic-enabled}}
+  key: injected
+replicaCount: 1
+pdb:
+  enabled: true
+global:
+  team: {{team}}
+  component: {{component}}
+ports:
+  port: 8080
+  targetPort: 8080
+scheduling:
+  useCustomTolerations: true
+  useCustomAffinity: true
+resources:
+  limits:
+    cpu: 900m
+    memory: 900Mi
+  requests:
+    cpu: 250m
+    memory: 250Mi

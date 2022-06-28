@@ -1,0 +1,34 @@
+empty-blocks:
+  EmptyFunctionBlock:
+    active: false
+
+performance:
+  SpreadOperator:
+    excludes: [ '**Application.kt' ]
+
+complexity:
+  TooManyFunctions:
+    excludes: [ '**/test/**', '**/integrationTest/**' ]
+
+naming:
+  FunctionNaming:
+    excludes: [ ]
+  PackageNaming:
+    excludes: [ ]
+    packagePattern: '[a-z]+(\.[a-z][a-z0-9]*)*'
+
+style:
+  ForbiddenComment:
+    values: ['FIXME:', 'STOPSHIP:']
+  MagicNumber:
+    excludes: [ '**/test/**', '**/integrationTest/**' ]
+  NewLineAtEndOfFile:
+    active: false
+  ReturnCount:
+    max: 3
+    excludeReturnFromLambda: true
+    excludeGuardClauses: true
+  UnusedImports:
+    active: true
+  WildcardImport:
+    active: false

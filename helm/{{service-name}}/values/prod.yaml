@@ -1,0 +1,6 @@
+replicaCount: 2
+env: "prod"
+
+scheduling:
+  useCustomTolerations: false
+  useCustomAffinity: false

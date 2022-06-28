@@ -1,0 +1,37 @@
+name: Release to PROD
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+jobs:
+  deploy-and-prepare-new-release:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Set POM_VERSION
+        run: echo "POM_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
+
+      - name: Set ARTIFACT_VERSION
+        run: echo "ARTIFACT_VERSION=${POM_VERSION}-$(git rev-parse --short HEAD)" >> ${GITHUB_ENV}
+
+      - uses: actions/checkout@v2
+
+      - name: Tag release
+        run: |
+          git tag ${ARTIFACT_VERSION}
+          git push origin ${ARTIFACT_VERSION}
+
+      - name: Deploy to PROD
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Deploy
+          token: ${{ secrets.WORKFLOW_DISPATCH_TOKEN }}
+          inputs: '{ "env": "PROD", "version": "${{ env.ARTIFACT_VERSION }}" }'
