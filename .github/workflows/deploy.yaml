@@ -94,7 +94,7 @@ jobs:
           revision: "${{ env.CHART_VERSION }}"
 
       - uses: 8398a7/action-slack@v3
-        if "${{ env.SLACK_WEBHOOK != '' }}"
+        if: "${{ env.SLACK_WEBHOOK != '' }}"
         with:
           status: ${{ job.status }}
           fields: repo,message,commit,author,ref,workflow,job,took
