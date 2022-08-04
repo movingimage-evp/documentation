@@ -1,12 +1,13 @@
-# Table of contents
+# Summary 
 
-- [Introduction](mainindex.md)
+# Platform
 
-## Analytics
+## VMPro
 
-## CorporateTube
-
-## Platform
+- [Index](platform/index.md)
+- [Best practices](platform/index.md)
+- [Login](platform/vmpro/login.md)
+- [Manual intro](platform/vmpro/manualstart.md)
 
 ### Quick Start
 
@@ -36,13 +37,18 @@
 - [Thumbnail](platform/quickstart/quick_vam/thumbnail.md)
 - [Create channel](platform/quickstart/quick_vam/createchannel.md)
 
-### VMPro
+# Release notes
 
-- [Index](platform/index.md)
-- [Best practices](platform/index.md)
-- [Login](platform/vmpro/login.md)
-- [Manual intro](platform/vmpro/manualstart.md)
+- [Release notes](releasenotes/index.md)
 
-## Release notes
+# Analytics
 
-## Virtual Events
+- [Analytics intro](analytics/analyticsindex.md)
+
+# CorporateTube
+
+- [CorporateTube intro](ct/ctindex.md)
+
+# Virtual Events
+
+- [Virtual Events start](virtualevents/ve_index.md)
