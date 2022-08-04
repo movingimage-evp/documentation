@@ -3,4 +3,4 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://login.md-qa.movingimage.com/auth/realms/platform-qa1
+          issuer-uri: https://login-qa.movingimage.com/auth/realms/platform-qa1
