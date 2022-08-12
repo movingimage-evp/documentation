@@ -1,27 +1,27 @@
-# Replace a video
+# Edit Video Data
 
-To update a video, you can replace the source file of an already uploaded video. The originally generated embed code and the video ID for the new video will be preserved.
+Once the upload process begins, you can edit your file's metadata. Editing options can be found in the right pane of the VideoManager.
 
-When a video is replaced by a new file, all previous metadata as well as chapters and overlays are preserved. Note that you may need to adjust these for the new video.
+1.  Select the desired video in the video list, by clicking the appropriate entry.
 
-If the original video was published, the new video will be available immediately after the replacement process is complete.
+    1.  You can search for the desired video with the help of the search function.
+    Click the search icon to enter a search term in the text box provided in the video toolbar. The search results will be shown in the video list.
 
-Note that audio files cannot be replaced with this feature.
+        >The search function of VideoManager allows you to search for specific videos. The search will include standard metadata and video IDs, and also the titles and descriptions of videos, existing chapters, and overlays.
 
-To replace a video:
+2.  The right pane of the window will reveal the video preview, as well as the metadata for the selected video.
 
-1.  In the video list, select the video you would like to replace.
-2.  Click the [Replace] button.
-3.  Select the video you wish to substitute for the video you previously chose. A dialog will open asking you to confirm the replacement.
-4.  Click on the [Replace] button; the replacement process will begin (and may take several minutes).
-5.  To see if your video has been correctly replaced, select the video and open the tab "Video Formats". You should now see the older version at the bottom. You can always download older versions.
+3.  The respective accordion menus provide editing options depending on your user rights. These options are described in detail in the following chapters.
 
-## Revert an interrupted replacement video upload
+## Metadata
 
-#### Check status of uploaded video
+The Metadata accordion menu provides information on the video, including standard and custom metadata. 
 
-As well, you can navigate to video formats in the side bar to see the status of the video upload.
-After restoring the video, the original video formats are displayed.
+If your account is set up to provide metadata in multiple languages, you can use the drop-down menu in the top right corner to select a metadata localization set to edit. 
+
+For more information about metadata localization sets, see the Metadata Localization chapter of the movingimage Administration Manual.
+
+### Standard metadata
 
 | Menu Item         | Description                                                                                                                                                                                |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -37,17 +37,25 @@ After restoring the video, the original video formats are displayed.
 | Filename          | The original name of the file that was uploaded (cannot be edited).                                                                                                                        |
 | Video-ID          | The video ID is assigned automatically by the system and cannot be edited.                                                                                                                 |
 
+*   **Video title**: Enter the desired video title.
+*   **Description**: Enter a short description of this video.
+*   **Keywords**: Enter keywords in the text box provided, and confirm this by the \[Enter\] key of your keyboard. Multiple keywords can be assigned.
+*   **Person in Charge**: You can optionally change the person in charge of this video.
+*   **Uploaded**: Upload date and the user who has uploaded this video file (cannot be edited).
+*   **Last Modification**: Date and user name of the last modification (cannot be edited).
+*   **Filename**: The original name of the file that was uploaded (cannot be edited).
+*   **Video-ID**: The video ID is assigned automatically by the system and cannot be edited.
+
+#### Custom Video Metadata:
+
+Your administrator may have applied custom video metadata fields that can be edited as well. 
+These fields come in a variety of types, editable in the following ways:
+
 | Data Type    | Interface Element                                                                                                                                                                                            |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-|  |
 | Text         | Type freely in the text field provided.                                                                                                                                                                      |
-|  |
 | Number       | You can either use the increment/decrement buttons, the up/down keys on your keyboard, or type a number directly into the number field.                                                                      |
 | Boolean      | Click the toggle switch to indicate true or false.                                                                                                                                                           |
 | Select       | Use the drop-down menu to make a selection – the options will appear in alphabetical order.                                                                                                                  |
 | Date         | Click the calendar icon to the right of the date field and use the date picker to set the desired date.                                                                                                      |
 | Multi Select | Click the text field and a list of valid options will appear. Start typing to search the list. Click or use the up, down, and enter keys on your keyboard to select an option. Add as many items as desired. |
-
-For information about how to configure these custom video metadata fields see the [Video Metadata](docs/platform/vmpro/vmproadmin/metadata_admin.md) chapter of the movingimage Administration Manual.
-
-
