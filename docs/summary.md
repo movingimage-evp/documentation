@@ -11,7 +11,6 @@
 ### VMPro
 
 - [Index](platform/index.md)
-- [Best practices](platform/index.md)
 - [Login](platform/vmpro/login.md)
 - [Manual intro](platform/vmpro/manualstart.md)
 
