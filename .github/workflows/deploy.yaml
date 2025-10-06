@@ -47,21 +47,18 @@ jobs:
       #   echo "NEW_RELIC_APP_ID=tbd" >> $GITHUB_ENV
 
       - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Install OpenVPN
-        run: |
-          sudo apt-get -qq update
-          sudo apt-get -qq install -y openvpn
+        uses: actions/checkout@v5
 
       - name: Connect to VPN
-        uses: kota65535/github-openvpn-connect-action@v1.0.2
+        uses: movingimage-evp/github-actions/github/connect-mi-vpn@main
         with:
-          config_file: .github/config.ovpn
-          username: ${{ env.OVPN_USERNAME }}
-          password: ${{ secrets.OVPN_PASSWORD }}
-          client_key: ${{ secrets.OVPN_CLIENT_KEY }}
-
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-subscription-id: ${{ secrets.AKS_CLUSTERS_SUBSCRIPTION_ID }}
+          azure-client-id: ${{ secrets.INFRA_SP_PROD_ID }}
+          azure-client-secret: ${{ secrets.INFRA_SP_PROD_SECRET }}
+          vpn-password: ${{ secrets.OVPN_PASSWORD }}
+          vpn-client-key: ${{ secrets.OVPN_CLIENT_KEY }}
+          
       - name: Install helm
         uses: azure/setup-helm@v1
         with:
